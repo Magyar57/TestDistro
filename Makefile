@@ -7,7 +7,7 @@ ISO_DIR=$(BUILD_DIR)/iso
 # ==== Files ====
 IMAGE=linux/arch/x86/boot/bzImage
 # Initramfs
-INITRAMFS_ARCHIVE=$(BUILD_DIR)/rootfs.cpio.gz
+INITRAMFS_ARCHIVE=$(BUILD_DIR)/initramfs.cpio.gz
 BASH_STATIC=$(INITRAMFS_DIR)/bin/bash
 BUSYBOX=$(INITRAMFS_DIR)/bin/busybox
 # ISO image (with Limine bootloader)
@@ -60,12 +60,12 @@ $(ISO_IMAGE): $(IMAGE) $(INITRAMFS_ARCHIVE) $(LIMINE_CONF) | $(LIMINE_EXEC)
 	cp $(INITRAMFS_ARCHIVE) $(ISO_DIR)/boot/
 	cp $(TOOLCHAIN_DIR)/limine/limine-bios.sys $(TOOLCHAIN_DIR)/limine/limine-bios-cd.bin $(TOOLCHAIN_DIR)/limine/limine-uefi-cd.bin $(ISO_DIR)
 	cp $(LIMINE_CONF) $(ISO_DIR)/boot
-	xorriso \
-		-as mkisofs \
-		-b limine-bios-cd.bin \
-		--efi-boot limine-uefi-cd.bin \
-		-no-emul-boot -boot-load-size 4 -boot-info-table \
-		$(ISO_DIR) -o $@
+	xorriso -as mkisofs -R -r -J -b limine-bios-cd.bin \
+        -no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus \
+        -apm-block-size 2048 --efi-boot limine-uefi-cd.bin \
+        -efi-boot-part --efi-boot-image --protective-msdos-label \
+        $(ISO_DIR) -o $@
+	$(LIMINE_EXEC) bios-install $@
 
 # Folders
 
