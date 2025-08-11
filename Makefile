@@ -5,9 +5,11 @@ INITRAMFS_DIR=$(BUILD_DIR)/initramfs
 ISO_DIR=$(BUILD_DIR)/iso
 
 # ==== Files ====
+# Kernel
 IMAGE=linux/arch/x86/boot/bzImage
 # Initramfs
 INITRAMFS_ARCHIVE=$(BUILD_DIR)/initramfs.cpio.gz
+INIT=$(INITRAMFS_DIR)/init
 BASH_STATIC=$(INITRAMFS_DIR)/bin/bash
 BUSYBOX=$(INITRAMFS_DIR)/bin/busybox
 # ISO image (with Limine bootloader)
@@ -43,8 +45,11 @@ $(BASH_STATIC): | $(TOOLCHAIN_DIR) $(BUILD_DIR)
 	cp $(TOOLCHAIN_DIR)/bash-static $@
 	chmod +x $@
 
-$(INITRAMFS_ARCHIVE): $(BASH_STATIC) $(BUSYBOX)
-	ln -sf /bin/bash $(INITRAMFS_DIR)/init
+$(INIT): init.sh
+	cp $< $@
+	chmod +x $@
+
+$(INITRAMFS_ARCHIVE): $(BASH_STATIC) $(BUSYBOX) $(INIT)
 	cd $(INITRAMFS_DIR) && find . | cpio -o --format=newc | gzip >../../$@
 
 # Bootloader
@@ -77,10 +82,8 @@ $(TOOLCHAIN_DIR):
 
 # Run
 
-run: $(IMAGE) $(INITRAMFS_ARCHIVE)
-	qemu-system-x86_64 \
-		-kernel $(IMAGE) \
-		-initrd $(INITRAMFS_ARCHIVE)
+run: $(ISO_IMAGE)
+	qemu-system-x86_64 -m 512M -cdrom $<
 
 # Clean
 
