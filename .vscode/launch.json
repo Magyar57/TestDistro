@@ -1,0 +1,11 @@
+{
+	"configurations": [
+		{
+			"name": "Launch distro",
+			"type": "node-terminal", // wrong but it works, so who cares ? not me
+			"request": "launch",
+			"command": "make run",
+			"preLaunchTask": "Build"
+		}
+	]
+}
