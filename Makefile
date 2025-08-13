@@ -39,6 +39,7 @@ $(BUSYBOX): | $(TOOLCHAIN_DIR) $(BUILD_DIR)
 	if [ ! -e $(TOOLCHAIN_DIR)/busybox ]; then wget -O $(TOOLCHAIN_DIR)/busybox $(BUSYBOX_URL); fi
 	cp $(TOOLCHAIN_DIR)/busybox $@
 	chmod +x $@
+	cd $(INITRAMFS_DIR) && for cmd in $$(./bin/busybox --list); do ln -sf /bin/busybox bin/$$cmd; done
 
 $(BASH_STATIC): | $(TOOLCHAIN_DIR) $(BUILD_DIR)
 	if [ ! -e $(TOOLCHAIN_DIR)/bash-static ]; then wget -O $(TOOLCHAIN_DIR)/bash-static $(BASH_STATIC_URL); fi
@@ -90,5 +91,5 @@ run: $(ISO_IMAGE)
 clean:
 	rm -rf $(BUILD_DIR)
 
-clean-toolchain:
+remove-toolchain:
 	rm -rf $(TOOLCHAIN_DIR)
